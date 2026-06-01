@@ -1,10 +1,21 @@
 # prd-writer
 
-> Turn "we need to build X" into a structured PRD that aligns stakeholders on the problem, the users, the requirements, and the success criteria — before anyone writes a line of code.
+> Turn "we need to build X" into a structured PRD that aligns stakeholders on the problem, the users, the requirements, and the success criteria — at the right depth for whoever is reading it.
 
 `prd-writer` is a single Markdown skill file (`SKILL.md`) that any AI coding or writing tool reads as instructions: Claude Code, Cursor, Windsurf, GitHub Copilot, Aider. The frontmatter routes it under Anthropic Agent Skills; the body is plain prose any tool can load.
 
-It composes patterns from Figma's PRD approach (Problem / Solution / Launch Readiness), Carlin Yuen's PRD structure (problem-first, use-case bucketed requirements), and the `spec-writer` skill's five-phase process (investigate → clarify → scope → draft → self-check) into a workflow that forces the agent to understand the problem **before** writing requirements.
+It composes patterns from Amazon's Working Backwards (lead with impact, no prize for extra pages), Marty Cagan / SVPG (requirements are often hypotheses in disguise — trace them back to the problem), Shreyas Doshi (executives read at the level of impact; track usage metrics, not just impact metrics), and the `spec-writer` skill's five-phase process (investigate → clarify → scope → draft → self-check) into a workflow that forces the agent to understand the problem **before** writing requirements.
+
+---
+
+## What makes it different: one skill, two registers
+
+A PRD a CTO approves and a PRD an engineering team builds from are different documents. Most templates pick one and force the other to fit. `prd-writer` picks the register from the reader:
+
+- **Executive** — read by leadership, directors, CTOs. ~1 page, leads with the business bet and impact, pushes detail into appendices and links. Default for Product PRDs.
+- **Operational** — read by the team that will build it. Every requirement, edge case, state, and metric resolved enough to act without a follow-up meeting. Default for Feature PRDs.
+
+The skill picks the default from the PRD type, then overrides on an explicit signal in your prompt ("one-pager for the board" → executive; "detailed PRD for eng" → operational). Both registers keep the same section order and the same bar: every sentence must change what someone decides after reading. Neither licenses vagueness or padding.
 
 ---
 
@@ -57,29 +68,41 @@ Context:
 - Success: 30% of paid users export at least once in 30 days
 ```
 
-The agent reads your product context, determines the right PRD type (product vs. feature), surfaces open questions, and writes the PRD to `docs/prd/<feature-name>/PRD.md`.
+The agent reads your product context, picks the PRD type and register, surfaces open questions, and writes the PRD to `docs/prd/<feature-name>/PRD.md`.
 
-For more prompts by scenario and level, see **[EXAMPLES.md](EXAMPLES.md)**.
+To force the register, name the reader:
+
+```
+Use prd-writer to write a one-page executive PRD for the leadership review
+on launching a usage-based pricing tier.
+```
+
+```
+Use prd-writer to write a detailed PRD for the eng team implementing
+SSO — include all edge cases and the telemetry plan.
+```
+
+For more prompts by scenario, see **[EXAMPLES.md](EXAMPLES.md)**.
 
 ---
 
 ## The problem this solves
 
-You ask an agent to write a PRD. It writes one. It just skipped the part where it understood the problem.
+You ask an agent to write a PRD. It writes one. It just skipped the part where it understood the problem — and it wrote at whatever depth it felt like.
 
-The result: a requirements list that's really a feature wishlist, goals that can't be measured, non-goals that are implicit (which means they'll be built anyway), and a "problem statement" that reads "users can't do X" — which is not a problem, it's a missing feature.
+The result: a requirements list that's really a feature wishlist, goals that can't be measured, non-goals that are implicit (so they get built anyway), and a "problem statement" that reads "users can't do X" — which isn't a problem, it's a missing feature. And the whole thing is either a one-pager handed to engineers who now need a meeting, or twenty pages handed to a CTO who skims and forgets.
 
-`prd-writer` forces a five-phase process where reading context, clarifying the problem, and scoping the solution come *before* writing a single requirement.
+`prd-writer` forces a five-phase process where reading context, clarifying the problem, and choosing the register come *before* writing a single requirement.
 
 ---
 
 ## The five phases
 
 1. **Understand context.** Read the product's context docs, existing PRDs, research, and strategy. Determine whether this is a Product PRD or Feature PRD.
-2. **Clarify the problem.** Validate the problem statement, evidence, target users, and scope before drafting. Surface open questions.
-3. **Scope the solution.** Define the elevator pitch, MVP, and top user flows at high level — no implementation details.
-4. **Draft the PRD.** Use the conditional template. Requirements are user-facing functional statements, not technical requirements.
-5. **Self-check.** Ten questions before saving. Anything that fails gets fixed.
+2. **Clarify the problem.** Validate the problem statement, evidence, target users, and scope. A requirement handed to you is often a hypothesis in disguise — trace it back to the problem it assumes. Surface open questions in one batch.
+3. **Choose the register, then scope.** Set executive vs. operational from the type and any explicit signal, then define the elevator pitch, MVP, and top user flows — no implementation details.
+4. **Draft the PRD.** Use the conditional template. Requirements are user-facing functional statements, not technical ones. In the executive register, lower sections collapse to a line plus a link; in the operational register, they're spelled out in full.
+5. **Self-check.** Eleven questions before saving, starting with: is the register consistent? Anything that fails gets fixed.
 
 ---
 
@@ -91,7 +114,7 @@ Rejected:
 > Users can't export their data.
 
 Accepted:
-> Users who need to reconcile dashboard data with their accounting tools spend 20+ min/week manually copying rows into spreadsheets, causing errors and abandoned workflows (source: 12 customer interviews, Aug 2024; support tickets: 34 in Q3).
+> Users who reconcile dashboard data with their accounting tools spend 20+ min/week manually copying rows into spreadsheets, causing errors and abandoned workflows (source: 12 customer interviews, Aug 2024; support tickets: 34 in Q3).
 
 ### Requirements
 
@@ -101,6 +124,16 @@ Rejected:
 Accepted:
 > [P0] R1 — Users can export the current table view as a CSV file.
 > [P1] R2 — Users can see export progress for tables with more than 1,000 rows.
+
+### Metrics
+
+Rejected:
+> *(impact metrics only)*
+
+Accepted:
+> **Usage** — % of paid users who export at least once in 30 days (is it being used?).  
+> **Impact** — reduction in support tickets tagged "manual export" (did it move the business?).  
+> **Counter-metric** — dashboard load time must not regress.
 
 ### Non-goals
 
@@ -140,6 +173,16 @@ prd-writer/
 ├── README.md             ← This file
 └── LICENSE
 ```
+
+---
+
+## References
+
+The skill's approach is grounded in primary sources, not generic templates:
+
+- **Amazon — *Working Backwards* (Colin Bryar & Bill Carr)** — the PR/FAQ process; lead with the customer, no prize for extra pages, distilled thinking over documented effort.
+- **Marty Cagan / SVPG** — [*Requirements Are Not*](https://www.svpg.com/requirements-are-not/) and [*The End of Requirements*](https://www.svpg.com/the-end-of-requirements/); requirements are often hypotheses or constraints in disguise.
+- **Shreyas Doshi** — the three levels of product work (execution / impact / optics) and the case for tracking usage metrics, not just impact metrics.
 
 ---
 
