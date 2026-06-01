@@ -10,13 +10,11 @@ It composes patterns from Figma's PRD approach (Problem / Solution / Launch Read
 
 ## Install
 
-### Via `npx` *(recommended)*
+### Via `npx skills` *(recommended)*
 
 ```bash
-npx degit eduardo-sl/prd-writer prd-writer
+npx skills add eduardo-sl/prd-writer
 ```
-
-Then move `SKILL.md` into the path your tool expects (see table below).
 
 ### Single file via `curl`
 
@@ -24,23 +22,23 @@ Then move `SKILL.md` into the path your tool expects (see table below).
 curl -fsSL https://raw.githubusercontent.com/eduardo-sl/prd-writer/main/SKILL.md -o SKILL.md
 ```
 
-### One-liner for Claude Code
+### Per-tool placement
+
+| Tool | Path |
+| --- | --- |
+| Claude Code | `.claude/skills/prd-writer/SKILL.md` |
+| Cursor | `.cursor/rules/prd-writer.mdc` |
+| Windsurf | `.windsurf/rules/prd-writer.md` |
+| GitHub Copilot | reference from `.github/copilot-instructions.md` |
+| Aider | `aider --read SKILL.md` |
+
+One-liner for Claude Code:
 
 ```bash
 mkdir -p .claude/skills/prd-writer && \
   curl -fsSL https://raw.githubusercontent.com/eduardo-sl/prd-writer/main/SKILL.md \
        -o .claude/skills/prd-writer/SKILL.md
 ```
-
-### Per-tool placement
-
-| Tool | Path |
-|------|------|
-| Claude Code | `.claude/skills/prd-writer/SKILL.md` |
-| Cursor | `.cursor/rules/prd-writer.mdc` |
-| Windsurf | `.windsurf/rules/prd-writer.md` |
-| GitHub Copilot | reference from `.github/copilot-instructions.md` |
-| Aider | `aider --read SKILL.md` |
 
 ---
 
@@ -61,7 +59,7 @@ Context:
 
 The agent reads your product context, determines the right PRD type (product vs. feature), surfaces open questions, and writes the PRD to `docs/prd/<feature-name>/PRD.md`.
 
-For more prompts by scenario and level, see **[EXAMPLES.md](./EXAMPLES.md)**.
+For more prompts by scenario and level, see **[EXAMPLES.md](EXAMPLES.md)**.
 
 ---
 
@@ -110,8 +108,8 @@ Rejected:
 > *(no non-goals section)*
 
 Accepted:
-> N1 — This PRD does **not** cover PDF export.
-> N2 — Scheduled or recurring exports are out of scope for MVP.
+> N1 — This PRD does **not** cover PDF export.  
+> N2 — Scheduled or recurring exports are out of scope for MVP.  
 > N3 — API access to export data is out of scope.
 
 ---
@@ -121,7 +119,7 @@ Accepted:
 `prd-writer` produces alignment documents. `spec-writer` produces implementation specs. They are complementary, not competing.
 
 | | PRD | Spec |
-|--|-----|------|
+| --- | --- | --- |
 | **Audience** | PM, design, eng, GTM, leadership | Engineers, AI coding agents |
 | **Answers** | What to build and why | How to build it |
 | **Language** | User-facing, plain language | Technical, system-level |
@@ -157,7 +155,7 @@ Issues and PRs welcome, especially for:
 
 ## License
 
-MIT — see [LICENSE](./LICENSE).
+MIT — see [LICENSE](LICENSE).
 
 ---
 
